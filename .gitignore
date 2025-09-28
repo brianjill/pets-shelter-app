@@ -55,3 +55,9 @@ nunit-*.xml
 
 #ide
 .idea
+
+*Local.json
+
+# JetBrains Rider
+*.sln.iml
+*DotSettings.user

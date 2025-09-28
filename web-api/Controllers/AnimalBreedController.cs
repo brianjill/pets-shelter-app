@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using PetsShelterApi.AzureAi;
 
 namespace PetsShelterApi.Controllers;
 
 [Route("api/[controller]")]
-public class AnimalBreedController : Controller
+public class AnimalBreedController(ICommentService commentService) : Controller
 {
-    [HttpGet]
-    public IReadOnlyCollection<string>? GetBreed()
-    {
-        return new List<string> { "Cat", "Dog" };
-        
-    }
+    [HttpPost]
+    public IReadOnlyCollection<string>? ReturnTextAnalysis(string text) => commentService.CommentAnalysis(text);
 }
