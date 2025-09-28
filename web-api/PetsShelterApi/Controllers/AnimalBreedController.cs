@@ -8,5 +8,5 @@ namespace PetsShelterApi.Controllers;
 public class AnimalBreedController(ICommentService commentService) : Controller
 {
     [HttpPost]
-    public IReadOnlyCollection<string>? ReturnTextAnalysis(string text) => commentService.CommentAnalysis(text);
+    public IReadOnlyCollection<string>? ReturnTextAnalysis(string comment, LanguageServiceOptions languageService) => commentService.CommentAnalysis(comment, languageService);
 }
