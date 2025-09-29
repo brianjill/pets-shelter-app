@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using PetsShelterApi.AzureAi;
 using PetsShelterApi.Utilities;
 
@@ -30,4 +32,18 @@ if (app.Environment.IsLocal())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+// SPA configuration
+app.UseSpa(spa =>
+{
+    // Path to React app folder (relative or absolute)
+    spa.Options.SourcePath = @"../../web-app";
+
+    if (app.Environment.IsLocal())
+    {
+        // Automatically run 'npm run dev' in that folder
+        spa.UseReactDevelopmentServer(npmScript: "dev");
+    }
+});
+
 app.Run();
