@@ -4,4 +4,5 @@ public enum LanguageServiceOptions
 {
     Sentiment,
     KeyPhraseExtraction,
+    NamedEntityRecognition,
 }

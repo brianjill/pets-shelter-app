@@ -9,11 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.Configure<AzureAiServicesApiOptions>(
-    builder.Configuration.GetSection(AzureAiServicesApiOptions.AzureAiServicesApi));
+builder.Services
+    .Configure<AzureAiChatOptions>(builder.Configuration.GetSection(AzureAiChatOptions.AzureAiChatApi))
+    .Configure<AzureAiHubOptions>(builder.Configuration.GetSection(AzureAiHubOptions.AzureAiHubApi));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ICommentService, CommentService>()
+    .AddScoped<IChatService, ChatService>()
+    .AddScoped<ITextAnalyticsProvider, TextAnalyticsProvider>();
 
 var app = builder.Build();
 
@@ -29,21 +32,9 @@ if (app.Environment.IsLocal())
     });
 }
 
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-
-// SPA configuration
-app.UseSpa(spa =>
-{
-    // Path to React app folder (relative or absolute)
-    spa.Options.SourcePath = @"../../web-app";
-
-    if (app.Environment.IsLocal())
-    {
-        // Automatically run 'npm run dev' in that folder
-        spa.UseReactDevelopmentServer(npmScript: "dev");
-    }
-});
 
 app.Run();

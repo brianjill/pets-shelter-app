@@ -6,44 +6,29 @@ namespace PetsShelterApi.AzureAi;
 
 public class CommentService : ICommentService
 {
-    private TextAnalyticsClient _client;
+    private readonly ITextAnalyticsProvider _textAnalyticsProvider;
 
-    public CommentService(IOptions<AzureAiServicesApiOptions> options)
+    public CommentService(ITextAnalyticsProvider textAnalyticsProvider)
     {
-        _client = new TextAnalyticsClient(new Uri(options.Value.Endpoint), new AzureKeyCredential(options.Value.Key));
+        _textAnalyticsProvider = textAnalyticsProvider;
     }
 
 
     public IReadOnlyCollection<string> CommentAnalysis(string comment, LanguageServiceOptions languageServiceOptions)
     {
-        if (_client == null) throw new Exception("client is null");
-        DetectedLanguage detectedLanguage = _client.DetectLanguage(comment);
-
+        var language = _textAnalyticsProvider.GetLanguage(comment);
+        var languageCode = language.Split(["ISO:"], StringSplitOptions.None).LastOrDefault()?.Trim() ?? "";
         var textAnalysis = languageServiceOptions switch
         {
-            LanguageServiceOptions.Sentiment => GetSentiment(comment),
-            LanguageServiceOptions.KeyPhraseExtraction => GetKeyPhraseExtraction(comment),
+            LanguageServiceOptions.Sentiment => _textAnalyticsProvider.GetSentiment(comment, languageCode),
+            LanguageServiceOptions.KeyPhraseExtraction => _textAnalyticsProvider.GetKeyPhraseExtraction(comment),
+            LanguageServiceOptions.NamedEntityRecognition => _textAnalyticsProvider.GetNamedEntityRecognition(comment),
             _ => "Unknown service"
         };
-        return new List<string> { textAnalysis, $"Detected language: {detectedLanguage.Name} ISO: {detectedLanguage.Iso6391Name}" };
+        return new List<string> { textAnalysis, language };
     }
 
-    private string GetSentiment(string text)
-    {
-        if (_client == null) throw new Exception("client is null");
-        DocumentSentiment sentiment = _client.AnalyzeSentiment(text);
 
-        return sentiment.Sentences.Aggregate(String.Empty, (current, sentence) => current + $"Sentence: {sentence.Text} => {sentence.Sentiment}\n");
-    }
-
-    private string GetKeyPhraseExtraction(string text)
-    {
-        if (_client == null) throw new Exception("client is null");
-
-        KeyPhraseCollection keyPhrases = _client.ExtractKeyPhrases(text);
-
-        return string.Join(",", keyPhrases);
-    }
 }
 
 public interface ICommentService
